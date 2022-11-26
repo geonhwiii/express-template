@@ -1,18 +1,33 @@
 import * as express from 'express';
 import catRouter from './cats/cats.route';
 
-const app: express.Express = express();
-const port: number = 8000;
+class Server {
+	public app: express.Application;
+	constructor() {
+		const app = express();
+		this.app = app;
+	}
+	private setRoute() {
+		this.app.use(catRouter);
+	}
+	private setMiddleware() {
+		this.app.use(express.json());
+		this.setRoute();
+		this.app.use((req, res) => {
+			res.send({ error: '404 NOT FOUND' });
+		});
+	}
+	public listen(port: number) {
+		this.setMiddleware();
+		this.app.listen(port, () => {
+			console.log(`server is running on PORT:${port}`);
+		});
+	}
+}
 
-/* JSON middleware  */
-app.use(express.json());
-app.use(catRouter);
+function init() {
+	const server = new Server();
+	server.listen(3000);
+}
 
-/* NOT FOUND */
-app.use((req, res) => {
-	res.send({ error: '404 NOT FOUND' });
-});
-
-app.listen(port, () => {
-	console.log(`server is running on PORT:${port}`);
-});
+init();
